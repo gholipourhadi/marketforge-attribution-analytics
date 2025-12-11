@@ -1,0 +1,2 @@
+"""QuantGuard dashboard package."""
+
