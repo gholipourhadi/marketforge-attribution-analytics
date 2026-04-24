@@ -1,8 +1,8 @@
-__pycache__/
-*.py[cod]
-.pytest_cache/
 .venv/
-.env
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
 .DS_Store
-data/*.csv
+.env
 

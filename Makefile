@@ -1,12 +1,27 @@
-.PHONY: install run api test docker
+.PHONY: install quality format test check data api dashboard
+
 install:
-	pip install -r requirements.txt
-run:
-	streamlit run app/dashboard.py
-api:
-	uvicorn api.main:app --reload
+	python -m pip install -r requirements-dev.txt
+
+quality:
+	ruff check .
+	black --check .
+
+format:
+	ruff check --fix .
+	black .
+
 test:
-	pytest -q
-docker:
-	docker compose up --build
+	python -m pytest
+
+check: quality test
+
+data:
+	python -m app.generate_data
+
+api:
+	uvicorn app.api.main:app --reload
+
+dashboard:
+	streamlit run app/dashboard.py
 

@@ -1,131 +1,78 @@
-# 🛡️ MarketForge Attribution Analytics
+# MarketForge Attribution Analytics
 
-### Institutional-grade portfolio analytics, risk intelligence and AI anomaly detection
+MarketForge is a privacy-aware marketing measurement platform for multi-touch customer journeys. It validates event-level telemetry, reconstructs point-in-time conversion paths, compares deterministic attribution models, estimates Markov removal effects, evaluates controlled experiments and simulates constrained channel-budget allocations.
 
-[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io)
-[![FastAPI](https://img.shields.io/badge/FastAPI-REST_API-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://docker.com)
-[![CI](https://img.shields.io/badge/GitHub_Actions-CI-2088FF?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+## Implemented capabilities
 
-MarketForge Attribution Analytics is an end-to-end financial analytics platform that transforms market data into portfolio decisions. It combines classical quantitative finance, Monte Carlo simulation, portfolio optimization and unsupervised machine learning in one interactive control center.
+- strict event contract, UTC normalization, consent filtering, event deduplication and revenue invariants
+- journey reconstruction using the first conversion and configurable lookback windows to prevent post-conversion leakage
+- first-touch, last-touch, linear, time-decay and position-based revenue attribution
+- cross-model sensitivity analysis and exact revenue-conservation checks
+- first-order Markov transition model with normalized channel removal effects
+- channel KPIs including spend, CTR, CVR, CPA, attributed revenue and ROAS
+- portfolio funnel and monthly acquisition-cohort reporting
+- two-arm conversion experiment evaluation with lift, standard error, confidence interval and significance flag
+- bounded budget allocation scenario using channel efficiency and diminishing-return response curves
+- FastAPI endpoints and an interactive Streamlit command center
+- deterministic synthetic sample data; no advertising-platform or customer data
+- automated Ruff, Black and pytest gates for Python 3.11 and 3.12
+- non-root Docker image and Compose services for API and dashboard
 
-> The project runs fully offline with deterministic synthetic market data. No API key, account or paid data provider is required.
+MarketForge is a portfolio/reference implementation. It does not claim causal attribution from observational paths, replace a production identity graph, or directly modify advertising accounts. Markov removal effects describe modeled journey dependence; incrementality requires randomized or defensible quasi-experimental evidence.
 
-## ✨ Product tour
+## Why this matters
 
-| Workspace | What it answers | Core visualizations |
-|---|---|---|
-| Executive Overview | How is the portfolio performing? | KPI cards, value curve, allocation donut, normalized prices |
-| Risk Lab | Where does risk come from? | Rolling volatility, drawdown, risk attribution, correlation heatmap |
-| Optimization | What allocation improves risk-adjusted return? | Efficient frontier, max-Sharpe allocation, weight comparison |
-| Forecast | What could the portfolio be worth in one year? | 2,500 Monte Carlo paths, confidence bands, terminal distribution |
-| Stress Tests | How does the portfolio react to shocks? | Scenario impact, loss estimates, custom shock attribution |
-| AI Anomalies | Which market days require investigation? | Isolation Forest alerts, anomaly scores, market dispersion |
+Marketing budgets are often allocated using last-touch attribution or intuition. That can
+systematically overvalue bottom-funnel channels such as branded search and retargeting while
+undervaluing channels that create demand earlier in a journey. MarketForge makes that bias visible:
 
-## 📊 Analytics included
+- `GET /api/v1/attribution/compare` shows how first-touch, last-touch, linear, time-decay, and
+  position-based models distribute the same revenue across the same journeys.
+- `GET /api/v1/markov` provides a model-independent comparison through channel-removal effects,
+  exposing channels that observed journeys suggest are difficult to replace.
+- `POST /api/v1/budget/scenario` converts attributed efficiency into bounded reallocations with
+  diminishing-return response curves instead of assigning unlimited budget to the highest ROAS.
+- `POST /api/v1/experiments/evaluate` reinforces the core guardrail: attribution and Markov outputs
+  are associational, so consequential reallocations should be validated with randomized holdouts.
 
-- Annualized return and volatility
-- Sharpe and Sortino ratios
-- Maximum drawdown and underwater curve
-- Historical Value at Risk and Conditional VaR
-- Component risk contribution
-- Rolling 60-day risk metrics
-- Cross-asset correlation matrix
-- Monte Carlo geometric wealth simulation
-- Random-portfolio efficient frontier
-- Maximum-Sharpe portfolio discovery
-- Historical and custom scenario stress testing
-- Isolation Forest anomaly detection
+The platform therefore forces an important decision question before money moves between channels:
+which attribution convention is being trusted, and how would the recommendation change under a
+different defensible assumption?
 
-## 🧠 Architecture
+## Quick start
 
-```mermaid
-flowchart TD
-    A["Synthetic market engine"] --> B["Returns pipeline"]
-    B --> C["Risk analytics"]
-    B --> D["Optimization engine"]
-    B --> E["ML anomaly detector"]
-    C --> F["Streamlit dashboard"]
-    D --> F
-    E --> F
-    C --> G["FastAPI service"]
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements-dev.txt
+make check
 ```
+
+Run `make api` and open `/docs`, run `make dashboard`, or start both services with `docker compose up --build`.
+
+## API surface
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/health` | Liveness and sample-data readiness |
+| GET | `/api/v1/quality` | Event and journey quality profile |
+| GET | `/api/v1/funnel` | Impression, click and conversion funnel |
+| POST | `/api/v1/attribution` | Channel revenue under a selected model |
+| GET | `/api/v1/attribution/compare` | Attribution model sensitivity |
+| GET | `/api/v1/channels` | Channel efficiency scorecard |
+| GET | `/api/v1/markov` | Markov removal effects |
+| GET | `/api/v1/cohorts` | Monthly conversion cohorts |
+| POST | `/api/v1/experiments/evaluate` | Binary experiment evaluation |
+| POST | `/api/v1/budget/scenario` | Constrained budget scenario |
+
+## Architecture
 
 ```text
-marketforge-attribution-analytics/
-├── app/                    # Six-workspace Streamlit product
-├── api/                    # FastAPI endpoints
-├── core/
-│   ├── data.py             # Reproducible market data engine
-│   ├── risk.py             # Quantitative risk metrics
-│   └── models.py           # Simulation, optimization and ML
-├── tests/                  # Analytics and model tests
-├── .github/workflows/      # Continuous integration
-├── Dockerfile
-├── docker-compose.yml
-├── Makefile
-└── requirements.txt
+Event telemetry -> contract + consent -> point-in-time journeys
+                                      -> attribution / Markov / funnel
+                                      -> experiments / budget scenarios
+                                      -> FastAPI + Streamlit
 ```
 
-## 🚀 Quick start
-
-```bash
-git clone https://github.com/YOUR_USERNAME/marketforge-attribution-analytics.git
-cd marketforge-attribution-analytics
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-streamlit run app/dashboard.py
-```
-
-Open `http://localhost:8501`.
-
-### Start the API
-
-```bash
-uvicorn api.main:app --reload
-```
-
-- Swagger documentation: `http://localhost:8000/docs`
-- Health endpoint: `http://localhost:8000/health`
-- Portfolio metrics: `http://localhost:8000/portfolio/metrics`
-
-### Run with Docker
-
-```bash
-docker compose up --build
-```
-
-This starts the dashboard on port `8501` and REST API on port `8000`.
-
-## 🧪 Testing
-
-```bash
-pytest -q
-```
-
-The CI workflow runs the full test suite automatically on every push and pull request.
-
-## 🔬 Model notes
-
-### Monte Carlo forecasting
-
-Daily multivariate returns are sampled from the empirical mean vector and covariance matrix. Each scenario compounds portfolio returns over 252 trading days to create a distribution of terminal values.
-
-### Efficient frontier
-
-Thousands of long-only allocations are sampled from a Dirichlet distribution. Expected return, volatility and Sharpe ratio are calculated for each portfolio; the maximum-Sharpe point is highlighted.
-
-### Anomaly detection
-
-Isolation Forest analyzes market movement, cross-sectional dispersion and an absolute-movement proxy. Its contamination parameter controls the expected alert rate.
-
-## ⚠️ Disclaimer
-
-MarketForge Attribution Analytics is an educational portfolio project. Synthetic data and model outputs are not financial advice and must not be used for real investment decisions.
-
-## 📄 License
-
-Released under the [MIT License](LICENSE). Copyright © 2026 Hadi Gholipour.
+See [architecture](docs/ARCHITECTURE.md), [data contract](docs/DATA_CONTRACT.md), [attribution model card](docs/MODEL_CARD.md), and [privacy notes](docs/PRIVACY.md). Every implemented claim above maps to committed code and automated tests.

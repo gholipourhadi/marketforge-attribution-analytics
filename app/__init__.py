@@ -1,2 +1,1 @@
-"""QuantGuard dashboard package."""
-
+"""MarketForge marketing measurement platform."""
